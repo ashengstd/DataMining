@@ -1,5 +1,5 @@
 .venv
 _pycache_
 .vscode
-runs
+runs/
 best_model.pth
