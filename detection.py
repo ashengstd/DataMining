@@ -2,13 +2,11 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tensorboardX import SummaryWriter
-
 from tqdm import tqdm
-import torch.nn.functional as F
 
-class VAE(nn.Module):
+class VAEAnomalyDetection(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim):
-        super(VAE, self).__init__()
+        super(VAEAnomalyDetection, self).__init__()
         self.encoder = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
             nn.ReLU(),
@@ -21,7 +19,7 @@ class VAE(nn.Module):
             nn.Sigmoid()
         )
 
-    def reparameterise(self, mu, logvar):
+    def reparameterize(self, mu, logvar):
         epsilon = torch.randn_like(mu)
         return mu + epsilon * torch.exp(logvar / 2)
 
@@ -32,30 +30,32 @@ class VAE(nn.Module):
 
         h = self.encoder(x)
         mu, logvar = h.chunk(2, dim=1)
-        z = self.reparameterise(mu, logvar)
+        z = self.reparameterize(mu, logvar)
         recon_x = self.decoder(z).view(size=org_size)
 
         return recon_x, mu, logvar
-    
-    def extract_features(self, X):
-        if isinstance(X, torch.Tensor):
-            with torch.no_grad():
-                return self.decoder(X)
-        else:
-            X = torch.Tensor(X).to('cuda:0')
-            with torch.no_grad():
-                return np.array(self.decoder(X).cpu())
+
+    def anomaly_score(self, x):
+        with torch.no_grad():
+            x_recon, mu, logvar = self(x)
+            recon_loss = nn.MSELoss(reduction='none')(x_recon, x).sum(dim=1)
+            kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1)
+            total_loss = recon_loss + kl_div
+        return total_loss
+
+    def predict_anomaly(self, x, threshold=0.5):
+        scores = self.anomaly_score(x)
+        predictions = scores > threshold
+        return predictions
 
 
-
-
-def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
+def train_vae_anomaly_detection(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
     input_dim = X_train.shape[1]  # 输入特征的维度
     latent_dim = 8
     hidden_dim = 32
 
-    vae = VAE(input_dim, hidden_dim, latent_dim).to(device)
-    optimizer = torch.optim.Adam(vae.parameters(), lr=0.001)
+    vae_anomaly = VAEAnomalyDetection(input_dim, hidden_dim, latent_dim).to(device)
+    optimizer = torch.optim.Adam(vae_anomaly.parameters(), lr=0.001)
 
     if progress:
         writer = SummaryWriter()
@@ -68,36 +68,27 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
     train_data = torch.utils.data.TensorDataset(X_train_torch, X_train_torch)
     test_loader = torch.utils.data.TensorDataset(X_test_torch, X_test_torch)
 
-    train_loader = torch.utils.data.DataLoader(train_data,
-                                               batch_size=batch_size,
-                                               shuffle=True)
-    test_loader = torch.utils.data.DataLoader(test_loader,
-                                              batch_size=batch_size,
-                                              shuffle=True)
-    
-    kl_loss = lambda mu, logvar: -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    recon_loss = lambda recon_x, x:nn.MSELoss()(recon_x, x)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_loader, batch_size=batch_size, shuffle=True)
 
     best_loss = 1e9
     best_epoch = 0
 
     for epoch in range(num_epoch):
-        vae.train()  # 将模型设置为训练模式
+        vae_anomaly.train()  # 将模型设置为训练模式
         train_loss = 0.0
         train_num = len(train_loader.dataset)
 
         # 使用 tqdm 添加进度条
-        with tqdm(train_loader,
-                  desc=f'Epoch {epoch + 1}/{num_epoch}',
-                  leave=False) as t:
+        with tqdm(train_loader, desc=f'Epoch {epoch + 1}/{num_epoch}', leave=False) as t:
             for data in t:
                 inputs, _ = data
                 inputs = inputs.to(device)  # 将输入数据移到GPU上
                 optimizer.zero_grad()
-                inputs_recon, mu, logvar = vae(inputs)
-                recon = recon_loss(inputs_recon, inputs)
-                kl = kl_loss(mu, logvar)
-                loss = recon + kl
+                inputs_recon, mu, logvar = vae_anomaly(inputs)
+                recon_loss = nn.MSELoss()(inputs_recon, inputs)
+                kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+                loss = recon_loss + kl_div
 
                 train_loss += loss.item()
 
@@ -108,23 +99,19 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
         train_loss /= train_num
 
         # 在每个 epoch 结束后评估模型性能
-        vae.eval()  # 将模型设置为评估模式
+        vae_anomaly.eval()  # 将模型设置为评估模式
         test_loss = 0.0
-        test_recon = 0.
-        test_kl = 0.
         test_num = len(test_loader.dataset)
         with torch.no_grad():
             for data in test_loader:
                 inputs, _ = data
                 inputs = inputs.to(device)  # 将输入数据移到GPU上
-                inputs_recon, mu, logvar = vae(inputs)
-                recon = recon_loss(inputs_recon, inputs)
-                kl = kl_loss(mu, logvar)
-                loss = recon + kl
-                
+                inputs_recon, mu, logvar = vae_anomaly(inputs)
+                recon_loss = nn.MSELoss()(inputs_recon, inputs)
+                kl_div = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+                loss = recon_loss + kl_div
+
                 test_loss += loss.item()
-                test_kl += kl.item()
-                test_recon += recon.item()
 
         test_loss /= test_num
 
@@ -132,17 +119,15 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
             writer.add_scalar('Loss/Train', train_loss, epoch + 1)
             writer.add_scalar('Loss/Test', test_loss, epoch + 1)
 
-        # print(
-        #     f'Epoch {epoch + 1}/{num_epoch}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}'
-        # )
+        # print(f'Epoch {epoch + 1}/{num_epoch}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}')
         if test_loss < best_loss:
             best_loss = test_loss
             best_epoch = epoch
 
-            torch.save(vae.state_dict(), 'best_model.pth')
+            torch.save(vae_anomaly.state_dict(), 'best_model_anomaly.pth')
             # print("Model saved")
-    
+
     if progress:
         writer.close()
     print('Best epoch:', best_epoch)
-    return vae
+    return vae_anomaly
