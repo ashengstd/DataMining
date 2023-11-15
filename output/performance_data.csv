@@ -1,23 +1,43 @@
 Classification Method,Data Process Method,Accuracy,Precision,Recall,F1 Score,Negative Accuracy
-LightGBM for VAE data,Original Data,0.977,0.977,1.0,0.988,0.0
-LightGBM for VAE data,Over-sampled Data,0.795,0.979,0.808,0.885,0.337
-LightGBM for VAE data,Under-sampled Data,0.483,0.983,0.479,0.644,0.567
-LightGBM for VAE data,Tomelinks Data,0.977,0.977,1.0,0.988,0.0
-LightGBM for VAE data,SMOTE Data,0.635,0.978,0.641,0.774,0.617
-SVM for VAE data,Original Data,0.977,0.977,1.0,0.988,0.0
-SVM for VAE data,Over-sampled Data,0.768,0.981,0.778,0.868,0.547
-SVM for VAE data,Under-sampled Data,0.485,0.98,0.483,0.647,0.68
-SVM for VAE data,Tomelinks Data,0.977,0.977,1.0,0.988,0.0
-SVM for VAE data,SMOTE Data,0.681,0.978,0.689,0.809,0.653
-AdaBoost for Decision Tree,Original Data,0.977,0.977,1.0,0.988,0.0
-AdaBoost for Decision Tree,Over-sampled Data,0.66,0.977,0.668,0.794,0.467
-AdaBoost for Decision Tree,Under-sampled Data,0.52,0.983,0.517,0.678,0.643
-AdaBoost for Decision Tree,Tomelinks Data,0.977,0.977,0.999,0.988,0.0
-AdaBoost for Decision Tree,SMOTE Data,0.57,0.976,0.574,0.723,0.56
-Stacking Ensemble Model for AdaBoost and LightGBM,Under-sampled Data,0.57,0.976,0.574,0.723,0.523
-Voting Ensemble Model for AdaBoost and LightGBM,Under-sampled Data,0.57,0.976,0.574,0.723,0.603
-Anomaly Detection with VAE,Original Data,0.977,0.977,1.0,0.988,0.0
-Anomaly Detection with VAE,Over-sampled Data,0.977,0.977,1.0,0.988,0.0
-Anomaly Detection with VAE,Under-sampled Data,0.977,0.977,1.0,0.988,0.0
-Anomaly Detection with VAE,Tomelinks Data,0.977,0.977,1.0,0.988,0.0
-Anomaly Detection with VAE,SMOTE Data,0.977,0.977,1.0,0.988,0.0
+LightGBM,Original Data,0.98,0.98,1.0,0.99,0.0
+LightGBM,Over-sampled Data,0.762,0.982,0.771,0.864,0.493
+LightGBM,Under-sampled Data,0.536,0.983,0.536,0.694,0.527
+LightGBM,Tomelinks Data,0.98,0.98,1.0,0.99,0.0
+LightGBM,SMOTE Data,0.052,0.942,0.035,0.068,1.0
+Random Forest,Original Data,0.974,0.981,0.993,0.987,1.0
+Random Forest,Over-sampled Data,0.952,0.984,0.967,0.975,1.0
+Random Forest,Under-sampled Data,0.513,0.987,0.51,0.673,1.0
+Random Forest,Tomelinks Data,0.974,0.981,0.993,0.987,1.0
+Random Forest,SMOTE Data,0.337,0.981,0.33,0.494,1.0
+AdaBoost for Decision Tree,Original Data,0.98,0.98,1.0,0.99,1.0
+AdaBoost for Decision Tree,Over-sampled Data,0.621,0.986,0.622,0.763,1.0
+AdaBoost for Decision Tree,Under-sampled Data,0.524,0.985,0.522,0.683,1.0
+AdaBoost for Decision Tree,Tomelinks Data,0.98,0.98,1.0,0.99,1.0
+AdaBoost for Decision Tree,SMOTE Data,0.039,0.962,0.021,0.041,1.0
+SVM,Original Data,0.98,0.98,1.0,0.99,1.0
+SVM,Over-sampled Data,0.799,0.984,0.808,0.887,1.0
+SVM,Under-sampled Data,0.476,0.985,0.472,0.638,1.0
+SVM,Tomelinks Data,0.98,0.98,1.0,0.99,1.0
+SVM,SMOTE Data,0.842,0.984,0.853,0.914,1.0
+LightGBM for VAE data,Original Data,0.98,0.98,1.0,0.99,0.0
+LightGBM for VAE data,Over-sampled Data,0.775,0.984,0.783,0.872,0.437
+LightGBM for VAE data,Under-sampled Data,0.511,0.985,0.509,0.671,0.583
+LightGBM for VAE data,Tomelinks Data,0.98,0.98,1.0,0.99,0.0
+LightGBM for VAE data,SMOTE Data,0.61,0.981,0.614,0.756,0.62
+SVM for VAE data,Original Data,0.98,0.98,1.0,0.99,0.0
+SVM for VAE data,Over-sampled Data,0.76,0.985,0.767,0.862,0.613
+SVM for VAE data,Under-sampled Data,0.545,0.983,0.546,0.702,0.633
+SVM for VAE data,Tomelinks Data,0.98,0.98,1.0,0.99,0.0
+SVM for VAE data,SMOTE Data,0.658,0.984,0.661,0.791,0.743
+AdaBoost for Decision Tree,Original Data,0.98,0.98,1.0,0.99,0.0
+AdaBoost for Decision Tree,Over-sampled Data,0.599,0.982,0.602,0.746,0.617
+AdaBoost for Decision Tree,Under-sampled Data,0.524,0.986,0.522,0.682,0.633
+AdaBoost for Decision Tree,Tomelinks Data,0.98,0.98,1.0,0.99,0.0
+AdaBoost for Decision Tree,SMOTE Data,0.571,0.979,0.574,0.724,0.583
+Stacking Ensemble Model for AdaBoost and LightGBM,Under-sampled Data,0.571,0.979,0.574,0.724,0.0
+Voting Ensemble Model for AdaBoost and LightGBM,Under-sampled Data,0.571,0.979,0.574,0.724,0.673
+Anomaly Detection with VAE,Original Data,0.98,0.98,1.0,0.99,0.0
+Anomaly Detection with VAE,Over-sampled Data,0.98,0.98,1.0,0.99,0.0
+Anomaly Detection with VAE,Under-sampled Data,0.98,0.98,1.0,0.99,0.0
+Anomaly Detection with VAE,Tomelinks Data,0.98,0.98,1.0,0.99,0.0
+Anomaly Detection with VAE,SMOTE Data,0.98,0.98,1.0,0.99,0.0
