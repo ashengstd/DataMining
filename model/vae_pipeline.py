@@ -42,14 +42,14 @@ class VAE(nn.Module):
             with torch.no_grad():
                 return self.decoder(X)
         else:
-            X = torch.Tensor(X).to('cuda:0')
+            X = torch.Tensor(X).to(torch.device("cuda:0" if torch.cuda.is_available() else "cpu"))
             with torch.no_grad():
                 return np.array(self.decoder(X).cpu())
 
 
 
 
-def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
+def train_vae(X_train, X_test, device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), progress=False, num_epoch=100):
     input_dim = X_train.shape[1]  # 输入特征的维度
     latent_dim = 8
     hidden_dim = 32

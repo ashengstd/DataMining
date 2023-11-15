@@ -61,7 +61,7 @@ class VAEAnomalyDetection(nn.Module):
 
 def train_vae_anomaly_detection(X_train,
                                 X_test,
-                                device='cuda:0',
+                                device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
                                 progress=False,
                                 num_epoch=100):
     input_dim = X_train.shape[1]  # 输入特征的维度
