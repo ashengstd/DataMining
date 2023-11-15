@@ -36,7 +36,7 @@ class VAE(nn.Module):
         recon_x = self.decoder(z).view(size=org_size)
 
         return recon_x, mu, logvar
-    
+
     def extract_features(self, X):
         if isinstance(X, torch.Tensor):
             with torch.no_grad():
@@ -74,9 +74,10 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
     test_loader = torch.utils.data.DataLoader(test_loader,
                                               batch_size=batch_size,
                                               shuffle=True)
-    
-    kl_loss = lambda mu, logvar: -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    recon_loss = lambda recon_x, x:nn.MSELoss()(recon_x, x)
+
+    kl_loss = lambda mu, logvar: -0.5 * torch.sum(1 + logvar - mu.pow(2) -
+                                                  logvar.exp())
+    recon_loss = lambda recon_x, x: nn.MSELoss()(recon_x, x)
 
     best_loss = 1e9
     best_epoch = 0
@@ -121,7 +122,7 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
                 recon = recon_loss(inputs_recon, inputs)
                 kl = kl_loss(mu, logvar)
                 loss = recon + kl
-                
+
                 test_loss += loss.item()
                 test_kl += kl.item()
                 test_recon += recon.item()
@@ -132,16 +133,10 @@ def train_vae(X_train, X_test, device='cuda:0', progress=False, num_epoch=100):
             writer.add_scalar('Loss/Train', train_loss, epoch + 1)
             writer.add_scalar('Loss/Test', test_loss, epoch + 1)
 
-        # print(
-        #     f'Epoch {epoch + 1}/{num_epoch}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}'
-        # )
         if test_loss < best_loss:
             best_loss = test_loss
             best_epoch = epoch
 
-            torch.save(vae.state_dict(), 'best_model.pth')
-            # print("Model saved")
-    
     if progress:
         writer.close()
     print('Best epoch:', best_epoch)
